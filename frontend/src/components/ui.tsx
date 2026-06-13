@@ -235,6 +235,63 @@ export function EmptyState({
   );
 }
 
+/* ----------------------------------------------------------- StatCard --- */
+export function StatCard({
+  label,
+  value,
+  icon,
+  tone = "indigo",
+}: {
+  label: string;
+  value: ReactNode;
+  icon?: ReactNode;
+  tone?: BadgeTone;
+}) {
+  return (
+    <Card className="p-4">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+          {label}
+        </p>
+        {icon && (
+          <span
+            className={cx(
+              "flex h-8 w-8 items-center justify-center rounded-lg",
+              badgeTones[tone]
+            )}
+          >
+            {icon}
+          </span>
+        )}
+      </div>
+      <p className="mt-2 text-2xl font-bold text-slate-900">{value}</p>
+    </Card>
+  );
+}
+
+/* --------------------------------------------------------- ProgressBar -- */
+export function ProgressBar({
+  value,
+  max,
+  className,
+}: {
+  value: number;
+  max: number;
+  className?: string;
+}) {
+  const pct = max > 0 ? Math.min(100, Math.round((value / max) * 100)) : 0;
+  const tone =
+    pct >= 100 ? "bg-red-500" : pct >= 75 ? "bg-amber-500" : "bg-emerald-500";
+  return (
+    <div className={cx("h-2.5 w-full overflow-hidden rounded-full bg-slate-100", className)}>
+      <div
+        className={cx("h-full rounded-full transition-all", tone)}
+        style={{ width: `${pct}%` }}
+      />
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------- Modal ---- */
 export function Modal({
   open,

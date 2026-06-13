@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\MetaController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\SavedSupervisorController;
@@ -24,6 +25,9 @@ Route::get('/departments', [MetaController::class, 'departments']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+
+    // Role-tailored dashboard payload (Module 4).
+    Route::get('/dashboard', [DashboardController::class, 'index']);
 
     Route::get('/interest-tags', [MetaController::class, 'interestTags']);
     Route::get('/topics', [MetaController::class, 'topics']);

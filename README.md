@@ -78,15 +78,9 @@ php artisan serve --host=127.0.0.1 --port=8000
 
 ```bash
 cd frontend
-cp .env.local.example .env.local   # or create it (see below)
+cp .env.example .env.local         # sets NEXT_PUBLIC_API_URL=http://localhost:8000
 npm install
 npm run dev
-```
-
-`frontend/.env.local`:
-
-```
-NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
 Open http://localhost:3000 and log in with a seeded account (password

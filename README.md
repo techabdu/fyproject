@@ -40,7 +40,7 @@ fyproject/
 
 ## Prerequisites
 
-- PHP 8.2+ with `pdo_mysql`, `mbstring`, `openssl`, `zip`, `gd`
+- PHP 8.3+ (8.4 recommended) with `pdo_mysql`, `mbstring`, `openssl`, `zip`, `gd`
 - Composer
 - Node 18+ and npm
 - MySQL 8 or MariaDB 10.4+

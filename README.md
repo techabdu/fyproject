@@ -99,8 +99,11 @@ request state machine + one-active-request integrity rule.
 ## Documentation
 
 - [`docs/schema.md`](./docs/schema.md) — ER diagram + table reference.
-- [`docs/api.md`](./docs/api.md) — REST endpoint reference.
+- [`docs/api.md`](./docs/api.md) — REST endpoint reference (all modules).
 - [`docs/seed-data.md`](./docs/seed-data.md) — demo accounts + seeded data.
+- [`docs/testing.md`](./docs/testing.md) — test-suite summary + coverage map.
+- [`docs/demo-script.md`](./docs/demo-script.md) — guided end-to-end demo.
+- [`docs/security-review.md`](./docs/security-review.md) — security review + controls.
 
 ## Key design decisions (brief §12)
 

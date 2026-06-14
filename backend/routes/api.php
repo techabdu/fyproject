@@ -1,8 +1,11 @@
 <?php
 
+use App\Http\Controllers\Api\AdminUserController;
+use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\MetaController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\SavedSupervisorController;
 use App\Http\Controllers\Api\SupervisionRequestController;
@@ -28,6 +31,21 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Role-tailored dashboard payload (Module 4).
     Route::get('/dashboard', [DashboardController::class, 'index']);
+
+    // ----- Module 5: In-app notifications (all roles) -------------------
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead']);
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead']);
+
+    // ----- Super Admin: user management + faculty analytics -------------
+    Route::middleware('role:super_admin')->prefix('admin')->group(function () {
+        Route::get('/users', [AdminUserController::class, 'index']);
+        Route::post('/users', [AdminUserController::class, 'store']);
+        Route::patch('/users/{user}', [AdminUserController::class, 'update']);
+        Route::delete('/users/{user}', [AdminUserController::class, 'destroy']);
+        Route::get('/analytics', [AnalyticsController::class, 'index']);
+    });
 
     Route::get('/interest-tags', [MetaController::class, 'interestTags']);
     Route::get('/topics', [MetaController::class, 'topics']);

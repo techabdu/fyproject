@@ -12,8 +12,8 @@ faculty, with department- and faculty-level oversight.
 1. **Project Repository** — upload, moderation queue, FULLTEXT search/filter, abstract preview, controlled PDF download, duplicate-overlap advisory.
 2. **Supervisor Matching** — interest-tag profiles, capacity, Jaccard keyword match score, bookmarks.
 3. **Supervision Requests** — submit, one-active-request rule, accept/decline (reason on decline), transactional capacity.
-4. **Role-based Dashboards** — one per role *(in progress — Phase 4)*.
-5. **In-app Notifications** *(in progress — Phase 5)*.
+4. **Role-based Dashboards** — one tailored dashboard per role, wired to live data + actions.
+5. **In-app Notifications** — event-driven bell with unread count + read/unread, plus super-admin user management and faculty analytics.
 
 Roles: **Student**, **Supervisor**, **Department Admin**, **Super Admin (Faculty)**.
 
@@ -122,6 +122,7 @@ request state machine + one-active-request integrity rule.
 
 ## Status
 
-Phases 0–3 complete (auth/RBAC, repository + moderation, matching, request
-workflow) with seed data and tests. Phases 4–6 (dashboards, notifications +
-admin analytics, hardening/polish) are next.
+Phases 0–5 complete: auth/RBAC, repository + moderation, supervisor matching,
+request workflow, role-based dashboards, and in-app notifications + super-admin
+user management + faculty analytics — with seed data and a 45-test PHPUnit
+suite. Phase 6 (final hardening/polish) is next.

@@ -10,6 +10,7 @@ use App\Http\Resources\ProjectResource;
 use App\Models\Project;
 use App\Models\ProjectKeyword;
 use App\Services\MatchScoreService;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -105,7 +106,7 @@ class ProjectController extends Controller
             return $project;
         });
 
-        // Phase 5: notify the relevant Department Admin(s) of a pending submission.
+        NotificationService::projectSubmitted($project);
 
         $project->load(['department', 'uploader', 'keywords']);
 
@@ -161,7 +162,7 @@ class ProjectController extends Controller
             'rejection_feedback' => null,
         ]);
 
-        // Phase 5: notify uploader their project was approved.
+        NotificationService::projectModerated($project);
 
         return (new ProjectResource($project->load(['department', 'uploader', 'keywords'])))->response();
     }
@@ -175,7 +176,7 @@ class ProjectController extends Controller
             'rejection_feedback' => $request->validated('rejection_feedback'),
         ]);
 
-        // Phase 5: notify uploader their project was rejected (with feedback).
+        NotificationService::projectModerated($project);
 
         return (new ProjectResource($project->load(['department', 'uploader', 'keywords'])))->response();
     }

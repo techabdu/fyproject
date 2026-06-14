@@ -81,6 +81,39 @@ Roles: `student`, `supervisor`, `dept_admin`, `super_admin`.
 
 ---
 
+## Module 4 — Dashboards
+
+| Method | Path | Auth | Notes |
+|---|---|---|---|
+| GET | `/api/dashboard` | any | Returns a payload tailored to the caller's role (student / supervisor / dept_admin / super_admin), containing only data that role may see. |
+
+---
+
+## Module 5 — Notifications, user management & analytics
+
+**Notifications (all roles):**
+
+| Method | Path | Auth | Notes |
+|---|---|---|---|
+| GET | `/api/notifications` | any | Recent notifications + `unread_count`. |
+| GET | `/api/notifications/unread-count` | any | `{count}`. |
+| POST | `/api/notifications/{id}/read` | any | Mark one read. |
+| POST | `/api/notifications/read-all` | any | Mark all read. |
+
+**notification** = `{id, type, message, payload, read_at, created_at}` · types: `project_submitted`, `project_approved`, `project_rejected`, `request_received`, `request_accepted`, `request_declined`.
+
+**Super-admin user management & analytics:**
+
+| Method | Path | Auth | Notes |
+|---|---|---|---|
+| GET | `/api/admin/users` | **super_admin** | List/paginate users. Query: `role`, `department_id`, `q`. |
+| POST | `/api/admin/users` | **super_admin** | Create a user (any role; supervisors get a profile). |
+| PATCH | `/api/admin/users/{id}` | **super_admin** | Update name/email/role/department (+ optional password). |
+| DELETE | `/api/admin/users/{id}` | **super_admin** | Delete (cannot delete self or the last super admin). |
+| GET | `/api/admin/analytics` | **super_admin** | Faculty aggregates: projects by status/year, requests by status, capacity utilisation, top interest areas + topics. |
+
+---
+
 ## Match score algorithm (Module 2)
 
 Jaccard similarity over normalised tag sets (lowercased, trimmed, de-duplicated):

@@ -29,19 +29,8 @@ return new class extends Migration
         // permits many NULLs but only one active row per student — race-safe even
         // under concurrent submissions. Application code also enforces this in a
         // transaction (see SupervisionRequestController), but this is the backstop.
-        if (DB::connection()->getDriverName() === 'mysql') {
-            DB::statement(
-                "ALTER TABLE supervision_requests
-                 ADD COLUMN active_lock BIGINT UNSIGNED
-                 GENERATED ALWAYS AS (
-                     CASE WHEN status IN ('pending','accepted') THEN student_id ELSE NULL END
-                 ) STORED"
-            );
-            DB::statement(
-                'ALTER TABLE supervision_requests
-                 ADD UNIQUE INDEX uniq_active_request_per_student (active_lock)'
-            );
-        }
+      // No database-level constraint needed - validation happens in the model
+
     }
 
     public function down(): void

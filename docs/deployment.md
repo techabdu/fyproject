@@ -24,8 +24,10 @@ need to do the dashboard steps below.
    - **Branch**: `deploy`  → enable **auto-deploy**.
 3. **Add a MySQL database**: Project → **New → Database → MySQL**. Copy its
    connection details.
-4. **Add a volume** (so uploaded PDFs persist): service → **Volumes → New
-   Volume**, mount path **`/app/storage`**.
+4. **Add a volume to the BACKEND service** (not MySQL — MySQL manages its own
+   storage). Click your **Laravel app service → Volumes → New Volume**, mount path
+   **`/app/storage`**, so uploaded PDFs survive redeploys. (`docker/start.sh`
+   recreates the storage folders on boot, so an empty volume is fine.)
 5. **Variables** (service → Variables) — from `backend/.env.production.example`:
    - `APP_KEY` → generate one locally with `php artisan key:generate --show`
    - `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://<your-railway-domain>`

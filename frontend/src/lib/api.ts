@@ -8,7 +8,10 @@
 //  4. JSON bodies set Content-Type: application/json; file uploads use
 //     FormData and must NOT set Content-Type (browser sets the boundary).
 
-const API = process.env.NEXT_PUBLIC_API_URL!;
+// Local dev: NEXT_PUBLIC_API_URL points at the Laravel origin (direct, CORS).
+// Production (Vercel proxy): leave it empty so requests are same-origin
+// relative paths (/api, /sanctum) that next.config.ts rewrites to the backend.
+const API = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 /** Error thrown for non-2xx responses. Carries the parsed body so forms can
  *  surface Laravel validation errors ({ message, errors: { field: [...] } }). */

@@ -13,6 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Behind a platform load balancer (Vercel/Railway/Render) — trust the
+        // proxy so HTTPS is detected and secure cookies are issued correctly.
+        $middleware->trustProxies(at: '*');
+
         // Sanctum SPA cookie auth: treat first-party (stateful) requests
         // from the configured frontend domains as session-authenticated.
         $middleware->statefulApi();

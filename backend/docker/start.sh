@@ -1,8 +1,7 @@
 #!/bin/sh
 # Container start: ensure the storage skeleton exists (a freshly-mounted
 # persistent volume starts empty and would otherwise hide these folders),
-# apply pending migrations, then serve.
-# (Seed the demo data once, manually, via the host's console — see docs/deployment.md.)
+# apply migrations, then serve.
 set -e
 
 mkdir -p \
@@ -13,6 +12,15 @@ mkdir -p \
   storage/framework/views \
   storage/logs
 
-php artisan migrate --force
+# First deploy / recovery: set DB_RESET_ON_DEPLOY=true to WIPE the database and
+# rebuild it cleanly with demo data (fixes a half-applied/inconsistent schema),
+# then REMOVE that variable so subsequent deploys only apply new migrations and
+# never wipe data.
+if [ "$DB_RESET_ON_DEPLOY" = "true" ]; then
+  echo ">> DB_RESET_ON_DEPLOY=true — running migrate:fresh --seed (this wipes the database)"
+  php artisan migrate:fresh --seed --force
+else
+  php artisan migrate --force
+fi
 
 exec php artisan serve --host=0.0.0.0 --port="${PORT:-8080}"

@@ -41,13 +41,12 @@ need to do the dashboard steps below.
 6. Railway exposes the container's port 8080 automatically and gives you a
    public URL (service → Settings → **Generate Domain**). Note it as your
    **backend URL**.
-7. **Seed the demo data once** (migrations run automatically on every deploy via
-   `docker/start.sh`; seeding is one-time): open the service **shell/console** and run:
-   ```
-   php artisan db:seed --force
-   ```
-   (Re-run only after a `php artisan migrate:fresh --force` — `db:seed` is not
-   idempotent for projects/requests.)
+7. **Build the schema + demo data on the first deploy.** Add the variable
+   **`DB_RESET_ON_DEPLOY=true`**, then redeploy. On boot the container runs
+   `migrate:fresh --seed` — a clean wipe + migrate + seed. Once it's healthy,
+   **remove `DB_RESET_ON_DEPLOY`** so future deploys only apply new migrations
+   and never wipe your data. (Normal deploys run `migrate --force`; seeding is a
+   one-time thing.)
 
 > **Render instead?** New **Web Service** → repo → **Root Directory `backend`**,
 > **Runtime: Docker**, **Branch `deploy`**; add a **MySQL** (or external) DB and a
@@ -98,3 +97,9 @@ That's it. From now on: **push to `deploy` → GitHub Actions runs the tests/bui
   are first-party without the proxy.
 - **`APP_KEY`** must be set or Laravel won't boot. Generate with
   `php artisan key:generate --show` and paste the `base64:...` value.
+- **Deploy crashloops with `42S01 ... table 'supervision_requests' already
+  exists`.** The database is half-migrated (a table exists but isn't recorded in
+  `migrations`, so `migrate` keeps trying to re-create it). Fix: set
+  **`DB_RESET_ON_DEPLOY=true`**, redeploy (it wipes + rebuilds + seeds), then
+  remove the variable. Avoid running `migrate:fresh`/`db:seed` from the console
+  at the same time as a deploy — that race is the usual cause.

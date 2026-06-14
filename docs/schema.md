@@ -15,6 +15,7 @@ erDiagram
     users ||--o{ supervision_requests : "sends (student)"
     users ||--o{ supervision_requests : "receives (supervisor)"
     users ||--o{ saved_supervisors : "bookmarks"
+    users ||--o{ notifications : "receives"
     supervisor_profiles ||--o{ supervisor_interest_tag : ""
     interest_tags ||--o{ supervisor_interest_tag : ""
     projects ||--o{ project_keywords : "has"
@@ -80,6 +81,14 @@ erDiagram
         bigint student_id FK
         bigint supervisor_id FK
     }
+    notifications {
+        uuid id PK
+        string type
+        string notifiable_type
+        bigint notifiable_id
+        text data "json: type, message, payload"
+        timestamp read_at "nullable"
+    }
 ```
 
 ## Tables
@@ -95,6 +104,7 @@ erDiagram
 | `project_keywords` | Normalised keywords per project | unique `(project_id, keyword)`; drives filters + duplicate indicator |
 | `supervision_requests` | Supervision request workflow | `status` enum; **`active_lock`** generated column + unique index enforces one active (pending/accepted) request per student |
 | `saved_supervisors` | Student bookmarks | unique `(student_id, supervisor_id)` |
+| `notifications` | In-app notifications (Laravel database channel) | polymorphic `notifiable`, JSON `data` (`type`, `message`, `payload`), `read_at` |
 
 ## Notable integrity mechanisms
 

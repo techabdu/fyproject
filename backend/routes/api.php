@@ -20,8 +20,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 // ----- Public -----------------------------------------------------------
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+// Throttle auth endpoints to blunt credential-stuffing / brute force.
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
 Route::get('/departments', [MetaController::class, 'departments']);
 
 // ----- Authenticated (any role) -----------------------------------------

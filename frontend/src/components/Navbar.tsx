@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { cx } from "./ui";
+import NotificationBell from "./NotificationBell";
 import {
   GraduationCap,
   Menu,
@@ -17,6 +18,7 @@ import {
   Bookmark,
   UserCog,
   ShieldCheck,
+  BarChart3,
 } from "lucide-react";
 import type { Role } from "@/lib/types";
 
@@ -75,6 +77,18 @@ const LINKS: NavLink[] = [
     label: "Moderation",
     icon: ShieldCheck,
     roles: ["dept_admin", "super_admin"],
+  },
+  {
+    href: "/admin/users",
+    label: "Users",
+    icon: UserCog,
+    roles: ["super_admin"],
+  },
+  {
+    href: "/analytics",
+    label: "Analytics",
+    icon: BarChart3,
+    roles: ["super_admin"],
   },
 ];
 
@@ -138,6 +152,7 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           {user ? (
             <>
+              <NotificationBell />
               <div className="hidden text-right sm:block">
                 <p className="text-sm font-semibold leading-tight text-slate-800">
                   {user.name}

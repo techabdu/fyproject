@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             ProjectSeeder::class,
             SupervisionRequestSeeder::class,
             SavedSupervisorSeeder::class,
+            NotificationSeeder::class,
         ]);
     }
 }

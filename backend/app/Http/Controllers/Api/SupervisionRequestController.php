@@ -10,6 +10,7 @@ use App\Http\Resources\SupervisionRequestResource;
 use App\Models\SupervisionRequest;
 use App\Models\SupervisorProfile;
 use App\Services\MatchScoreService;
+use App\Services\NotificationService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -81,9 +82,9 @@ class SupervisionRequestController extends Controller
             throw $e;
         }
 
-        // Phase 5: notify the supervisor of the new request.
-
         $supervisionRequest->load(['supervisor.supervisorProfile', 'student']);
+
+        NotificationService::requestReceived($supervisionRequest);
 
         return (new SupervisionRequestResource($supervisionRequest))
             ->response()
@@ -120,9 +121,9 @@ class SupervisionRequestController extends Controller
             ]);
         });
 
-        // Phase 5: notify the student their request was accepted.
-
         $supervisionRequest->load(['supervisor.supervisorProfile', 'student']);
+
+        NotificationService::requestDecided($supervisionRequest);
 
         return (new SupervisionRequestResource($supervisionRequest))->response();
     }
@@ -141,9 +142,9 @@ class SupervisionRequestController extends Controller
             'decision_reason' => $request->validated('decision_reason'),
         ]);
 
-        // Phase 5: notify the student their request was declined (with reason).
-
         $supervisionRequest->load(['supervisor.supervisorProfile', 'student']);
+
+        NotificationService::requestDecided($supervisionRequest);
 
         return (new SupervisionRequestResource($supervisionRequest))->response();
     }

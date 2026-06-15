@@ -39,7 +39,7 @@ const LINKS: NavLink[] = [
   { href: "/requests", label: "My Requests", icon: Inbox, roles: ["student"], section: "Supervision" },
   { href: "/requests", label: "Incoming Requests", icon: Inbox, roles: ["supervisor"], section: "Supervision" },
   { href: "/saved", label: "Bookmarks", icon: Bookmark, roles: ["student"], section: "Supervision" },
-  { href: "/profile", label: "My Profile", icon: UserCog, roles: ["supervisor"], section: "Supervision" },
+  { href: "/profile", label: "My Profile", icon: UserCog, roles: ["student", "supervisor", "dept_admin", "super_admin"], section: "Main" },
   { href: "/moderation", label: "Moderation", icon: ShieldCheck, roles: ["dept_admin", "super_admin"], section: "Management" },
   { href: "/admin/users", label: "Users", icon: UserCog, roles: ["super_admin"], section: "Management" },
   { href: "/analytics", label: "Analytics", icon: BarChart3, roles: ["super_admin"], section: "Management" },
@@ -73,7 +73,7 @@ export default function Sidebar() {
 
   const sidebarContent = (
     <div className="flex h-full flex-col">
-      <div className="flex h-14 shrink-0 items-center gap-2.5 border-b border-slate-100 px-4">
+      <div className="flex h-14 shrink-0 items-center justify-between border-b border-slate-100 px-4">
         <Link href="/dashboard" className="flex items-center gap-2.5 min-w-0">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--color-primary)] text-white">
             <GraduationCap className="h-[18px] w-[18px]" />
@@ -84,6 +84,13 @@ export default function Sidebar() {
             </span>
           )}
         </Link>
+        <button
+          onClick={toggle}
+          className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors md:flex"
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+        </button>
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4">
@@ -146,13 +153,6 @@ export default function Sidebar() {
           </div>
         )}
 
-        <button
-          onClick={toggle}
-          className="mt-2 hidden w-full items-center justify-center rounded-lg py-1.5 text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-colors md:flex"
-          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
-        </button>
       </div>
     </div>
   );

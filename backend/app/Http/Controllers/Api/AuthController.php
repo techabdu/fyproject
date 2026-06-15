@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Models\SupervisorProfile;
 use App\Models\User;
@@ -82,6 +83,25 @@ class AuthController extends Controller
         if ($request->hasSession()) {
             $request->session()->regenerate();
         }
+    }
+
+    public function updateProfile(UpdateProfileRequest $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if ($request->filled('name')) {
+            $user->name = $request->string('name');
+        }
+
+        if ($request->filled('password')) {
+            $user->password = $request->string('password');
+        }
+
+        $user->save();
+
+        $user->load(['department', 'supervisorProfile.interestTags']);
+
+        return (new UserResource($user))->response();
     }
 
     /** Current authenticated user with department + (if any) supervisor profile. */

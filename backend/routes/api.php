@@ -29,6 +29,7 @@ Route::get('/departments', [MetaController::class, 'departments']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
 
     // Role-tailored dashboard payload (Module 4).
     Route::get('/dashboard', [DashboardController::class, 'index']);

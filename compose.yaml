@@ -1,0 +1,79 @@
+# One-command local setup for the FYP platform.
+#
+#   docker compose up --build        # start everything (first run builds + seeds)
+#   open http://localhost:3000       # log in with a seeded account (password: "password")
+#   docker compose down              # stop (keeps your data)
+#   docker compose down -v           # stop and wipe the database + uploads (fresh seed next time)
+#
+# Services:
+#   frontend → http://localhost:3000   Next.js
+#   backend  → http://localhost:8000   Laravel API
+#   db       → MariaDB 10.11 (same engine the test suite/CI use)
+#
+# The browser calls the API directly at http://localhost:8000; CORS + a shared
+# cookie domain (SESSION_DOMAIN=localhost) make Sanctum's SPA session work across
+# the two ports — no reverse proxy needed.
+
+services:
+  db:
+    image: mariadb:10.11
+    environment:
+      MARIADB_DATABASE: fyp
+      MARIADB_USER: fyp
+      MARIADB_PASSWORD: fyp_secret
+      MARIADB_ROOT_PASSWORD: root_secret
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306" # optional: point a DB GUI at localhost:3306
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_NAME: "FYP Platform"
+      APP_ENV: local
+      # Demo key — fine to ship for a local app. Regenerate with:
+      #   php -r "echo 'base64:'.base64_encode(random_bytes(32)).PHP_EOL;"
+      APP_KEY: "base64:/RCKV8Hn3iTle5aViekz0TsOD3FzuhAioxgT9wlKHtg="
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8000
+      FRONTEND_URL: http://localhost:3000
+      LOG_CHANNEL: stderr
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_DATABASE: fyp
+      DB_USERNAME: fyp
+      DB_PASSWORD: fyp_secret
+      SESSION_DRIVER: database
+      SESSION_DOMAIN: localhost
+      SANCTUM_STATEFUL_DOMAINS: localhost:3000,127.0.0.1:3000,localhost:8000
+      CACHE_STORE: database
+      QUEUE_CONNECTION: database
+      FILESYSTEM_DISK: local
+    volumes:
+      - backend_storage:/app/storage # keep uploaded PDFs across restarts
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
+volumes:
+  db_data:
+  backend_storage:

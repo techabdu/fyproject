@@ -1,7 +1,7 @@
 #!/bin/sh
-# Container start: ensure the storage skeleton exists (a freshly-mounted
-# persistent volume starts empty and would otherwise hide these folders),
-# apply migrations, then serve.
+# Container start (Docker Compose). Recreate the storage skeleton (a freshly
+# mounted volume starts empty and would otherwise hide these folders), wait for
+# the database, apply migrations, seed demo data on the very first run, then serve.
 set -e
 
 mkdir -p \
@@ -12,15 +12,29 @@ mkdir -p \
   storage/framework/views \
   storage/logs
 
-# First deploy / recovery: set DB_RESET_ON_DEPLOY=true to WIPE the database and
-# rebuild it cleanly with demo data (fixes a half-applied/inconsistent schema),
-# then REMOVE that variable so subsequent deploys only apply new migrations and
-# never wipe data.
-if [ "$DB_RESET_ON_DEPLOY" = "true" ]; then
-  echo ">> DB_RESET_ON_DEPLOY=true — running migrate:fresh --seed (this wipes the database)"
-  php artisan migrate:fresh --seed --force
-else
-  php artisan migrate --force
+# Wait for the database to accept TCP connections. Compose's healthcheck +
+# depends_on usually covers this, but retry so a cold start never races the DB.
+echo ">> waiting for database ${DB_HOST:-db}:${DB_PORT:-3306} ..."
+i=0
+until php -r 'exit(@fsockopen(getenv("DB_HOST")?:"db", (int)(getenv("DB_PORT")?:3306)) ? 0 : 1);' 2>/dev/null; do
+  i=$((i + 1))
+  if [ "$i" -ge 60 ]; then
+    echo "!! database not reachable after 60s, giving up"
+    exit 1
+  fi
+  sleep 1
+done
+
+php artisan migrate --force
+
+# Seed demo data once. Some seeders are not idempotent (re-running would
+# duplicate rows and trip the one-active-request unique index), so guard on a
+# sentinel that lives on the persistent storage volume — it exists only after a
+# successful first seed. To reset everything, run `docker compose down -v`.
+if [ ! -f storage/app/.seeded ]; then
+  echo ">> first run: seeding demo data ..."
+  php artisan db:seed --force
+  touch storage/app/.seeded
 fi
 
-exec php artisan serve --host=0.0.0.0 --port="${PORT:-8080}"
+exec php artisan serve --host=0.0.0.0 --port="${PORT:-8000}"

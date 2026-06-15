@@ -24,13 +24,32 @@ return new class extends Migration
         });
 
         // DB-level integrity backstop for the "one active request per student"
-        // rule. A STORED generated column equals the student_id while the row is
-        // active (pending|accepted) and NULL otherwise. A UNIQUE index over it
-        // permits many NULLs but only one active row per student — race-safe even
-        // under concurrent submissions. Application code also enforces this in a
+        // rule. A generated column equals the student_id while the row is active
+        // (pending|accepted) and NULL otherwise; a UNIQUE index over it permits
+        // many NULLs but only one active row per student — race-safe even under
+        // concurrent submissions. Application code also enforces this in a
         // transaction (see SupervisionRequestController), but this is the backstop.
-      // No database-level constraint needed - validation happens in the model
-
+        //
+        // The column is VIRTUAL (computed on read), not STORED, for portability:
+        // student_id carries an ON DELETE CASCADE foreign key, and MySQL 8 forbids
+        // a CASCADE foreign key on the base column of a STORED generated column —
+        // it rebuilds the table to materialise a STORED column and the foreign-key
+        // re-creation fails with "1215 Cannot add foreign key constraint". A VIRTUAL
+        // column is added in place with no rebuild, so it works on both MySQL 8 and
+        // MariaDB while preserving the cascade and the unique index.
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement(
+                "ALTER TABLE supervision_requests
+                 ADD COLUMN active_lock BIGINT UNSIGNED
+                 GENERATED ALWAYS AS (
+                     CASE WHEN status IN ('pending','accepted') THEN student_id ELSE NULL END
+                 ) VIRTUAL"
+            );
+            DB::statement(
+                'ALTER TABLE supervision_requests
+                 ADD UNIQUE INDEX uniq_active_request_per_student (active_lock)'
+            );
+        }
     }
 
     public function down(): void

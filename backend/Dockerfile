@@ -1,6 +1,6 @@
-# Demo-grade Laravel container: PHP 8.4 + the built-in server with multiple
-# workers. Simple and reliable for an FYP demo; swap in nginx/FrankenPHP if you
-# later need higher concurrency.
+# Local Laravel container (used by Docker Compose): PHP 8.4 + the built-in
+# server with multiple workers. Simple and reliable for running/sharing the
+# project locally; swap in nginx/FrankenPHP if you later need higher concurrency.
 FROM php:8.4-cli
 
 # Reliable extension installer (pulls the system libs each ext needs).
@@ -20,5 +20,5 @@ RUN composer install --no-dev --no-interaction --optimize-autoloader --no-progre
 # Let the built-in server handle concurrent requests.
 ENV PHP_CLI_SERVER_WORKERS=4
 
-EXPOSE 8080
+EXPOSE 8000
 CMD ["sh", "docker/start.sh"]

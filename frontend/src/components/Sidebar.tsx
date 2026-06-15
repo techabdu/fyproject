@@ -74,19 +74,22 @@ export default function Sidebar() {
   const sidebarContent = (
     <div className="flex h-full flex-col">
       <div className="flex h-14 shrink-0 items-center justify-between border-b border-slate-100 px-4">
-        <Link href="/dashboard" className="flex items-center gap-2.5 min-w-0">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--color-primary)] text-white">
-            <GraduationCap className="h-[18px] w-[18px]" />
-          </span>
-          {!collapsed && (
+        {!collapsed && (
+          <Link href="/dashboard" className="flex items-center gap-2.5 min-w-0">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--color-primary)] text-white">
+              <GraduationCap className="h-[18px] w-[18px]" />
+            </span>
             <span className="truncate text-sm font-bold text-slate-900 tracking-tight">
               FYP Platform
             </span>
-          )}
-        </Link>
+          </Link>
+        )}
         <button
           onClick={toggle}
-          className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors md:flex"
+          className={cx(
+            "hidden h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors md:flex",
+            collapsed && "mx-auto"
+          )}
           title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}

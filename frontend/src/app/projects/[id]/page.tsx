@@ -13,6 +13,7 @@ import {
   StatusBadge,
   PageSpinner,
   Alert,
+  Avatar,
 } from "@/components/ui";
 import {
   ArrowLeft,
@@ -108,7 +109,11 @@ function ProjectDetailInner() {
                 {project.graduation_year}
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <UserIcon className="h-4 w-4" />
+                {project.uploader ? (
+                  <Avatar name={project.uploader.name} role={project.uploader.role} size="sm" />
+                ) : (
+                  <UserIcon className="h-4 w-4" />
+                )}
                 {project.uploader?.name ?? "Unknown"}
               </span>
             </div>

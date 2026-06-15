@@ -26,6 +26,7 @@ import {
   ChevronUp,
   ChevronLeft,
   ChevronRight,
+  Circle,
 } from "lucide-react";
 import type { Project, Department, Paginated } from "@/lib/types";
 
@@ -244,48 +245,69 @@ function ProjectsInner() {
             project{(meta?.total ?? projects.length) === 1 ? "" : "s"}
           </p>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {projects.map((p) => (
-              <Link key={p.id} href={`/projects/${p.id}`} className="group">
-                <Card
-                  hover
-                  className={`flex h-full flex-col p-5 ${
-                    p.status === "approved"
-                      ? "border-l-2 border-l-blue-500"
-                      : ""
-                  }`}
-                >
-                  <h3 className="line-clamp-2 text-base font-semibold text-slate-900 group-hover:text-indigo-700">
-                    {p.title}
-                  </h3>
-                  <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-slate-500">
-                    {p.abstract}
-                  </p>
-                  <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-500">
-                    <span className="inline-flex items-center gap-1">
-                      <Building2 className="h-3.5 w-3.5" />
-                      {p.department?.name ?? "—"}
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <Calendar className="h-3.5 w-3.5" />
-                      {p.graduation_year}
-                    </span>
-                  </div>
-                  {p.keywords?.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {p.keywords.slice(0, 4).map((k) => (
-                        <Badge key={k} tone="blue">
-                          {k}
-                        </Badge>
-                      ))}
-                      {p.keywords.length > 4 && (
-                        <Badge tone="gray">+{p.keywords.length - 4}</Badge>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {projects.map((p) => {
+              const statusColor =
+                p.status === "approved"
+                  ? "text-emerald-500"
+                  : p.status === "rejected"
+                    ? "text-red-400"
+                    : "text-amber-400";
+
+              return (
+                <Link key={p.id} href={`/projects/${p.id}`} className="group">
+                  <Card hover className="flex h-full flex-col p-5">
+                    <div className="flex items-center justify-between">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400">
+                        <Circle className={`h-2 w-2 fill-current ${statusColor}`} />
+                        {p.status.charAt(0).toUpperCase() + p.status.slice(1)}
+                      </span>
+                      <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+                        {p.graduation_year}
+                      </span>
+                    </div>
+
+                    <h3 className="mt-3 line-clamp-2 text-base font-semibold text-slate-900 transition-colors group-hover:text-blue-600">
+                      {p.title}
+                    </h3>
+                    {p.uploader?.name && (
+                      <p className="mt-1 text-xs text-slate-400">
+                        by {p.uploader.name}
+                      </p>
+                    )}
+
+                    <p className="mt-3 line-clamp-3 flex-1 text-sm leading-relaxed text-slate-500">
+                      {p.abstract}
+                    </p>
+
+                    <div className="mt-4 border-t border-slate-100 pt-3">
+                      <div className="flex items-center gap-3 text-xs text-slate-500">
+                        <span className="inline-flex items-center gap-1">
+                          <Building2 className="h-3.5 w-3.5 text-slate-400" />
+                          {p.department?.name ?? "—"}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                          {p.graduation_year}
+                        </span>
+                      </div>
+                      {p.keywords?.length > 0 && (
+                        <div className="mt-2.5 flex flex-wrap gap-1.5">
+                          {p.keywords.slice(0, 3).map((k) => (
+                            <Badge key={k} tone="blue">
+                              {k}
+                            </Badge>
+                          ))}
+                          {p.keywords.length > 3 && (
+                            <Badge tone="gray">+{p.keywords.length - 3}</Badge>
+                          )}
+                        </div>
                       )}
                     </div>
-                  )}
-                </Card>
-              </Link>
-            ))}
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
 
           {/* Pagination */}

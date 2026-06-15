@@ -19,23 +19,6 @@ class SupervisionRequest extends Model
         'decision_reason',
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
-        
-        static::creating(function ($model) {
-            if (in_array($model->status, ['pending', 'accepted'])) {
-                $exists = self::where('student_id', $model->student_id)
-                    ->whereIn('status', ['pending', 'accepted'])
-                    ->exists();
-                
-                if ($exists) {
-                    throw new \Exception('Student already has an active request');
-                }
-            }
-        }
-                         }
-
     /** @var array<string, string> */
     protected $casts = [
         'status' => RequestStatus::class,

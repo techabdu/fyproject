@@ -15,10 +15,11 @@ import {
   Modal,
   EmptyState,
   PageSpinner,
+  Avatar,
 } from "@/components/ui";
 import { apiGet, apiPost, apiPatch, apiDelete, ApiError } from "@/lib/api";
 import type { Department } from "@/lib/types";
-import { UserPlus, Pencil, Trash2, Search } from "lucide-react";
+import { UserPlus, Pencil, Trash2, Search, Users } from "lucide-react";
 
 const ROLE_TONES: Record<string, any> = {
   student: "blue",
@@ -50,11 +51,9 @@ function UsersInner() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Filters.
   const [roleFilter, setRoleFilter] = useState("");
   const [q, setQ] = useState("");
 
-  // Create/edit modal.
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState({ ...emptyForm });
@@ -62,7 +61,6 @@ function UsersInner() {
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // Delete confirm.
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -186,7 +184,6 @@ function UsersInner() {
 
       {error && <Alert tone="error" className="mb-4">{error}</Alert>}
 
-      {/* Filters */}
       <Card className="mb-6 p-4">
         <form
           onSubmit={(e) => {
@@ -219,24 +216,33 @@ function UsersInner() {
       {loading ? (
         <PageSpinner label="Loading users…" />
       ) : users.length === 0 ? (
-        <EmptyState title="No users found" description="Try a different search or filter." />
+        <EmptyState
+          title="No users found"
+          description="Try a different search or filter."
+          icon={<Users className="h-6 w-6" />}
+        />
       ) : (
         <Card className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
+            <thead className="border-b border-slate-200 bg-slate-50">
               <tr>
-                <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3">Role</th>
-                <th className="px-4 py-3">Department</th>
-                <th className="px-4 py-3 text-right">Actions</th>
+                <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-slate-500">User</th>
+                <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-slate-500">Role</th>
+                <th className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-slate-500">Department</th>
+                <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {users.map((u) => (
-                <tr key={u.id} className="hover:bg-slate-50">
+                <tr key={u.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-4 py-3">
-                    <p className="font-medium text-slate-800">{u.name}</p>
-                    <p className="text-xs text-slate-400">{u.email}</p>
+                    <div className="flex items-center gap-3">
+                      <Avatar name={u.name} role={u.role} size="sm" />
+                      <div>
+                        <p className="font-medium text-slate-800">{u.name}</p>
+                        <p className="text-xs text-slate-400">{u.email}</p>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <Badge tone={ROLE_TONES[u.role] ?? "gray"}>{ROLE_LABELS[u.role] ?? u.role}</Badge>
@@ -244,10 +250,18 @@ function UsersInner() {
                   <td className="px-4 py-3 text-slate-600">{u.department?.name ?? "—"}</td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-1">
-                      <button onClick={() => openEdit(u)} className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-indigo-600" title="Edit">
+                      <button
+                        onClick={() => openEdit(u)}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-blue-600 transition-colors"
+                        title="Edit"
+                      >
                         <Pencil className="h-4 w-4" />
                       </button>
-                      <button onClick={() => setDeleteTarget(u)} className="rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600" title="Delete">
+                      <button
+                        onClick={() => setDeleteTarget(u)}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                        title="Delete"
+                      >
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
@@ -267,7 +281,6 @@ function UsersInner() {
         </div>
       )}
 
-      {/* Create / edit modal */}
       <Modal open={formOpen} onClose={() => setFormOpen(false)} title={editing ? "Edit user" : "Add user"}>
         {formError && <Alert tone="error" className="mb-4">{formError}</Alert>}
         <form onSubmit={submitForm} className="space-y-4">
@@ -321,12 +334,11 @@ function UsersInner() {
         </form>
       </Modal>
 
-      {/* Delete confirm */}
       <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Delete user">
         <p className="text-sm text-slate-600">
           Delete <span className="font-semibold">{deleteTarget?.name}</span> ({deleteTarget?.email})? This cannot be undone.
         </p>
-        <div className="mt-5 flex justify-end gap-3">
+        <div className="mt-5 flex justify-end gap-3 border-t border-slate-100 pt-4">
           <Button variant="outline" onClick={() => setDeleteTarget(null)}>Cancel</Button>
           <Button variant="danger" loading={deleting} onClick={doDelete}>Delete user</Button>
         </div>

@@ -71,7 +71,7 @@ function ProjectDetailInner() {
     }
   }
 
-  if (loading) return <PageSpinner label="Loading project…" />;
+  if (loading) return <PageSpinner label="Loading project..." />;
 
   if (error || !project) {
     return (
@@ -90,17 +90,13 @@ function ProjectDetailInner() {
         {/* Main */}
         <div className="lg:col-span-2">
           <Card className="p-6 sm:p-8">
-            <div className="flex flex-wrap items-center gap-2">
+            {/* Header with status badge top-right */}
+            <div className="flex items-start justify-between gap-4">
+              <h1 className="text-2xl font-bold text-slate-900">
+                {project.title}
+              </h1>
               <StatusBadge status={project.status} />
-              {project.keywords?.slice(0, 6).map((k) => (
-                <Badge key={k} tone="blue">
-                  {k}
-                </Badge>
-              ))}
             </div>
-            <h1 className="mt-4 text-2xl font-bold text-slate-900">
-              {project.title}
-            </h1>
 
             <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-500">
               <span className="inline-flex items-center gap-1.5">
@@ -117,26 +113,36 @@ function ProjectDetailInner() {
               </span>
             </div>
 
+            {project.keywords?.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-1.5">
+                {project.keywords.slice(0, 6).map((k) => (
+                  <Badge key={k} tone="blue">
+                    {k}
+                  </Badge>
+                ))}
+              </div>
+            )}
+
             <hr className="my-6 border-slate-200" />
 
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
               Abstract
             </h2>
-            <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-700">
+            <p className="mt-2 whitespace-pre-line text-base leading-relaxed text-slate-700">
               {project.abstract}
             </p>
 
-            <div className="mt-6">
+            <div className="mt-8 flex items-center gap-3">
               <Button onClick={handleDownload} loading={downloading}>
                 <Download className="h-4 w-4" />
                 Download PDF
               </Button>
-              {downloadError && (
-                <Alert tone="error" className="mt-3">
-                  {downloadError}
-                </Alert>
-              )}
             </div>
+            {downloadError && (
+              <Alert tone="error" className="mt-3">
+                {downloadError}
+              </Alert>
+            )}
 
             {project.status === "rejected" && project.rejection_feedback && (
               <Alert tone="warning" className="mt-6">
@@ -147,19 +153,20 @@ function ProjectDetailInner() {
           </Card>
         </div>
 
-        {/* Similar projects advisory */}
+        {/* Similar projects sidebar */}
         <div>
           <Card className="p-6">
             <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
               <FileText className="h-5 w-5 text-indigo-600" />
-              Similar projects
+              Similar Projects
             </h2>
             <p className="mt-1 text-xs text-slate-500">
               Existing projects with overlapping keywords.
             </p>
-            <div className="mt-4 space-y-3">
+
+            <div className="mt-4 space-y-2">
               {similar.length === 0 ? (
-                <p className="text-sm text-slate-400">
+                <p className="py-4 text-center text-sm text-slate-400">
                   No closely related projects found.
                 </p>
               ) : (
@@ -167,12 +174,12 @@ function ProjectDetailInner() {
                   <Link
                     key={s.id}
                     href={`/projects/${s.id}`}
-                    className="block rounded-lg border border-slate-200 p-3 transition-colors hover:border-indigo-300 hover:bg-indigo-50"
+                    className="block rounded-lg border border-slate-200 p-3 transition-colors hover:border-indigo-300 hover:bg-slate-50"
                   >
                     <p className="line-clamp-2 text-sm font-medium text-slate-800">
                       {s.title}
                     </p>
-                    <div className="mt-1.5 flex items-center justify-between">
+                    <div className="mt-2 flex items-center justify-between">
                       <span className="text-xs text-slate-500">
                         {s.graduation_year}
                       </span>
@@ -185,7 +192,7 @@ function ProjectDetailInner() {
                         {s.matching_keywords.slice(0, 4).map((k) => (
                           <span
                             key={k}
-                            className="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] text-slate-600"
+                            className="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-600"
                           >
                             {k}
                           </span>
@@ -207,7 +214,7 @@ function BackLink() {
   return (
     <Link
       href="/projects"
-      className="mb-5 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-800"
+      className="mb-5 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
     >
       <ArrowLeft className="h-4 w-4" />
       Back to repository

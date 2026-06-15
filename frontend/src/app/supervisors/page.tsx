@@ -14,6 +14,8 @@ import {
   PageSpinner,
   EmptyState,
   Alert,
+  Avatar,
+  ProgressBar,
 } from "@/components/ui";
 import { parseKeywords } from "@/lib/utils";
 import {
@@ -23,6 +25,7 @@ import {
   Building2,
   Users as UsersIcon,
   Send,
+  UserSearch,
 } from "lucide-react";
 import type { Supervisor, Department } from "@/lib/types";
 
@@ -121,28 +124,34 @@ function SupervisorsInner() {
         description="Enter your proposal keywords to rank supervisors by how well their interests match."
       />
 
-      <Card className="mb-6 p-4">
-        <form onSubmit={onSearch} className="space-y-3">
+      <Card className="mb-6 p-5">
+        <form onSubmit={onSearch} className="space-y-4">
+          {/* Proposal keywords - prominent */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">
+            <label className="mb-1.5 block text-sm font-semibold text-slate-800">
               Your proposal keywords
             </label>
             <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
               <Input
                 value={proposalKeywords}
                 onChange={(e) => setProposalKeywords(e.target.value)}
-                placeholder="e.g. machine learning, networks, security"
-                className="pl-9"
+                placeholder="e.g. machine learning, neural networks, computer vision"
+                className="h-11 pl-11 text-base"
               />
             </div>
-            <p className="mt-1 text-xs text-slate-400">
-              Comma-separated. Supervisors are ranked by match when provided.
+            <p className="mt-1.5 text-xs text-slate-400">
+              Separate keywords with commas. Supervisors are ranked by how
+              closely their research interests match your keywords.
             </p>
           </div>
 
+          {/* Filter row */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-12">
             <div className="sm:col-span-4">
+              <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+                Interest area
+              </label>
               <Select
                 value={interest}
                 onChange={(e) => setInterest(e.target.value)}
@@ -156,6 +165,9 @@ function SupervisorsInner() {
               </Select>
             </div>
             <div className="sm:col-span-4">
+              <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+                Department
+              </label>
               <Select
                 value={departmentId}
                 onChange={(e) => setDepartmentId(e.target.value)}
@@ -168,19 +180,20 @@ function SupervisorsInner() {
                 ))}
               </Select>
             </div>
-            <div className="flex items-center sm:col-span-2">
-              <label className="flex items-center gap-2 text-sm text-slate-700">
+            <div className="flex items-end sm:col-span-2">
+              <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
                 <input
                   type="checkbox"
                   checked={availableOnly}
                   onChange={(e) => setAvailableOnly(e.target.checked)}
                   className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                 />
-                Available only
+                Available
               </label>
             </div>
-            <div className="sm:col-span-2">
-              <Button type="submit" className="w-full">
+            <div className="flex items-end sm:col-span-2">
+              <Button type="submit" className="h-10 w-full">
+                <Search className="h-4 w-4" />
                 Search
               </Button>
             </div>
@@ -195,61 +208,65 @@ function SupervisorsInner() {
       )}
 
       {loading ? (
-        <PageSpinner label="Loading supervisors…" />
+        <PageSpinner label="Loading supervisors..." />
       ) : supervisors.length === 0 ? (
         <EmptyState
+          icon={<UserSearch className="h-10 w-10 text-slate-300" />}
           title="No supervisors found"
           description="Try removing some filters or broadening your keywords."
         />
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {supervisors.map((s) => (
-            <Card key={s.id} className="flex flex-col p-5">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <Link
-                    href={`/supervisors/${s.id}`}
-                    className="text-base font-semibold text-slate-900 hover:text-indigo-700"
-                  >
-                    {s.name}
-                  </Link>
-                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
-                    <span className="inline-flex items-center gap-1">
-                      <Building2 className="h-3.5 w-3.5" />
-                      {s.department?.name ?? "—"}
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <UsersIcon className="h-3.5 w-3.5" />
-                      {s.current_load}/{s.max_capacity} students
-                    </span>
+            <Card key={s.id} hover className="flex flex-col p-5">
+              <div className="flex items-start gap-3">
+                <Avatar name={s.name} role="supervisor" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <Link
+                        href={`/supervisors/${s.id}`}
+                        className="text-base font-semibold text-slate-900 hover:text-indigo-700"
+                      >
+                        {s.name}
+                      </Link>
+                      <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+                        <span className="inline-flex items-center gap-1">
+                          <Building2 className="h-3.5 w-3.5" />
+                          {s.department?.name ?? "—"}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      {s.match && (
+                        <Badge
+                          tone={
+                            s.match.percentage >= 60
+                              ? "green"
+                              : s.match.percentage >= 30
+                              ? "yellow"
+                              : "gray"
+                          }
+                        >
+                          {s.match.percentage}%
+                        </Badge>
+                      )}
+                      <button
+                        onClick={() => toggleSave(s)}
+                        disabled={savingId === s.id}
+                        title={
+                          s.is_saved ? "Remove bookmark" : "Save supervisor"
+                        }
+                        className="rounded-md p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-indigo-600 disabled:opacity-50"
+                      >
+                        {s.is_saved ? (
+                          <BookmarkCheck className="h-5 w-5 text-indigo-600" />
+                        ) : (
+                          <Bookmark className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
-                </div>
-                <div className="flex shrink-0 flex-col items-end gap-2">
-                  {s.match && (
-                    <Badge
-                      tone={
-                        s.match.percentage >= 60
-                          ? "green"
-                          : s.match.percentage >= 30
-                          ? "yellow"
-                          : "gray"
-                      }
-                    >
-                      {s.match.percentage}% match
-                    </Badge>
-                  )}
-                  <button
-                    onClick={() => toggleSave(s)}
-                    disabled={savingId === s.id}
-                    title={s.is_saved ? "Remove bookmark" : "Save supervisor"}
-                    className="text-slate-400 hover:text-indigo-600 disabled:opacity-50"
-                  >
-                    {s.is_saved ? (
-                      <BookmarkCheck className="h-5 w-5 text-indigo-600" />
-                    ) : (
-                      <Bookmark className="h-5 w-5" />
-                    )}
-                  </button>
                 </div>
               </div>
 
@@ -259,8 +276,22 @@ function SupervisorsInner() {
                 </p>
               )}
 
-              {/* Availability */}
+              {/* Capacity bar */}
               <div className="mt-3">
+                <div className="mb-1 flex items-center justify-between text-xs text-slate-500">
+                  <span className="inline-flex items-center gap-1">
+                    <UsersIcon className="h-3.5 w-3.5" />
+                    Capacity
+                  </span>
+                  <span>
+                    {s.current_load}/{s.max_capacity} students
+                  </span>
+                </div>
+                <ProgressBar value={s.current_load} max={s.max_capacity} />
+              </div>
+
+              {/* Availability badge */}
+              <div className="mt-2">
                 <Badge tone={s.has_capacity ? "green" : "red"}>
                   {s.has_capacity
                     ? `${s.available_slots} slot${

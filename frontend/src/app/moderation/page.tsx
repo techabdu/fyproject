@@ -16,8 +16,8 @@ import {
   EmptyState,
   PageSpinner,
 } from "@/components/ui";
-import { formatDate } from "@/lib/utils";
-import { Check, X, FileDown, ShieldCheck } from "lucide-react";
+import { formatDate, timeAgo } from "@/lib/utils";
+import { Check, X, FileDown, ShieldCheck, CheckCircle2, Clock } from "lucide-react";
 import type { Project, Paginated } from "@/lib/types";
 
 function ModerationInner() {
@@ -29,7 +29,6 @@ function ModerationInner() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionId, setActionId] = useState<number | null>(null);
 
-  // Reject modal.
   const [rejectTarget, setRejectTarget] = useState<Project | null>(null);
   const [feedback, setFeedback] = useState("");
 
@@ -91,26 +90,23 @@ function ModerationInner() {
     <Container>
       <PageHeader
         title="Moderation Queue"
-        description="Review submitted projects awaiting approval. Approving makes a project searchable to everyone; rejecting returns it to the student with your feedback."
+        description="Review submitted projects awaiting approval."
       />
 
       {error && (
-        <Alert tone="error" className="mb-4">
-          {error}
-        </Alert>
+        <Alert tone="error" className="mb-4">{error}</Alert>
       )}
       {actionError && (
-        <Alert tone="error" className="mb-4">
-          {actionError}
-        </Alert>
+        <Alert tone="error" className="mb-4">{actionError}</Alert>
       )}
 
       {loading ? (
         <PageSpinner label="Loading queue…" />
       ) : projects.length === 0 ? (
         <EmptyState
-          title="Nothing to review"
+          title="All caught up"
           description="There are no projects pending approval in your scope right now."
+          icon={<CheckCircle2 className="h-6 w-6" />}
         />
       ) : (
         <>
@@ -125,9 +121,12 @@ function ModerationInner() {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <Badge tone="yellow">pending</Badge>
+                      <Badge tone="yellow">
+                        <Clock className="mr-1 h-3 w-3" />
+                        pending
+                      </Badge>
                       <span className="text-xs text-slate-400">
-                        submitted {formatDate(p.created_at)}
+                        {timeAgo(p.created_at)}
                       </span>
                     </div>
                     <h3 className="mt-2 text-lg font-semibold text-slate-900">
@@ -173,9 +172,7 @@ function ModerationInner() {
                 {p.keywords.length > 0 && (
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     {p.keywords.map((k) => (
-                      <Badge key={k} tone="blue">
-                        {k}
-                      </Badge>
+                      <Badge key={k} tone="blue">{k}</Badge>
                     ))}
                   </div>
                 )}
@@ -183,7 +180,7 @@ function ModerationInner() {
                 <div className="mt-4 border-t border-slate-100 pt-3">
                   <button
                     onClick={() => downloadProjectPdf(p.id, `${p.title}.pdf`)}
-                    className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-800"
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
                   >
                     <FileDown className="h-4 w-4" />
                     Download PDF to review
@@ -193,7 +190,6 @@ function ModerationInner() {
             ))}
           </div>
 
-          {/* Pagination */}
           {meta && meta.last_page > 1 && (
             <div className="mt-6 flex items-center justify-center gap-3">
               <Button
@@ -220,7 +216,6 @@ function ModerationInner() {
         </>
       )}
 
-      {/* Reject feedback modal */}
       <Modal
         open={!!rejectTarget}
         onClose={() => setRejectTarget(null)}
@@ -243,7 +238,7 @@ function ModerationInner() {
             message={actionError && rejectTarget ? actionError : undefined}
           />
         </div>
-        <div className="mt-5 flex justify-end gap-3">
+        <div className="mt-5 flex justify-end gap-3 border-t border-slate-100 pt-4">
           <Button variant="outline" onClick={() => setRejectTarget(null)}>
             Cancel
           </Button>

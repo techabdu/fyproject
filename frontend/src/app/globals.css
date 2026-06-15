@@ -3,6 +3,20 @@
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
+  --color-primary: #1e3a5f;
+  --color-primary-hover: #15304f;
+  --color-accent: #2563eb;
+  --color-accent-light: #eff6ff;
+  --color-surface: #ffffff;
+  --color-page: #f8fafc;
+  --color-border: #e2e8f0;
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+  --color-success: #059669;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+  --sidebar-width: 256px;
+  --sidebar-collapsed-width: 68px;
 }
 
 @theme inline {
@@ -13,14 +27,45 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-page);
+  color: var(--color-text);
   font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Thin, tidy scrollbars for tables / long content */
 * {
   scrollbar-width: thin;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-in {
+  animation: slideInUp 0.25s ease-out both;
+}
+
+.animate-fade {
+  animation: fadeIn 0.2s ease-out both;
+}
+
+.animate-scale {
+  animation: scaleIn 0.2s ease-out both;
 }

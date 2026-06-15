@@ -14,8 +14,12 @@ import {
   Badge,
   FieldError,
   Alert,
+  ProgressBar,
+  Avatar,
+  Divider,
 } from "@/components/ui";
 import { parseKeywords } from "@/lib/utils";
+import { Save, Users, Briefcase } from "lucide-react";
 
 function ProfileInner() {
   const { user, refresh } = useAuth();
@@ -30,7 +34,6 @@ function ProfileInner() {
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [saved, setSaved] = useState(false);
 
-  // Seed the form from the current profile.
   useEffect(() => {
     if (profile) {
       setBio(profile.bio ?? "");
@@ -69,6 +72,10 @@ function ProfileInner() {
     }
   }
 
+  const pct = profile && profile.max_capacity > 0
+    ? Math.round((profile.current_load / profile.max_capacity) * 100)
+    : 0;
+
   return (
     <Container className="max-w-3xl">
       <PageHeader
@@ -76,20 +83,24 @@ function ProfileInner() {
         description="Update your bio, supervision capacity and interest areas."
       />
 
-      {/* Capacity summary */}
       {profile && (
         <Card className="mb-6 p-5">
-          <div className="flex flex-wrap gap-2">
-            <Badge tone="indigo">
-              Current load: {profile.current_load}/{profile.max_capacity}
-            </Badge>
-            <Badge tone={profile.has_capacity ? "green" : "red"}>
-              {profile.available_slots} slot
-              {profile.available_slots === 1 ? "" : "s"} open
-            </Badge>
-            <Badge tone={profile.has_capacity ? "green" : "yellow"}>
-              {profile.has_capacity ? "Accepting students" : "At capacity"}
-            </Badge>
+          <div className="flex items-center gap-4">
+            {user && <Avatar name={user.name} role="supervisor" size="lg" />}
+            <div className="min-w-0 flex-1">
+              <p className="text-lg font-semibold text-slate-900">{user?.name}</p>
+              <p className="text-sm text-slate-500">{user?.department?.name ?? "No department"}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Badge tone="indigo">
+                  <Users className="mr-1 h-3 w-3" />
+                  {profile.current_load}/{profile.max_capacity} students
+                </Badge>
+                <Badge tone={profile.has_capacity ? "green" : "yellow"}>
+                  {profile.has_capacity ? `${profile.available_slots} slots open` : "At capacity"}
+                </Badge>
+              </div>
+              <ProgressBar value={profile.current_load} max={profile.max_capacity} className="mt-3" />
+            </div>
           </div>
         </Card>
       )}
@@ -106,7 +117,7 @@ function ProfileInner() {
           </Alert>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <Label htmlFor="bio">Bio</Label>
             <Textarea
@@ -118,6 +129,8 @@ function ProfileInner() {
             />
             <FieldError message={errors.bio?.[0]} />
           </div>
+
+          <Divider />
 
           <div className="max-w-xs">
             <Label htmlFor="max_capacity">Maximum capacity</Label>
@@ -134,6 +147,8 @@ function ProfileInner() {
             </p>
             <FieldError message={errors.max_capacity?.[0]} />
           </div>
+
+          <Divider />
 
           <div>
             <Label htmlFor="interest_tags">Interest areas</Label>
@@ -156,8 +171,9 @@ function ProfileInner() {
             <FieldError message={errors.interest_tags?.[0]} />
           </div>
 
-          <div className="flex justify-end pt-2">
+          <div className="flex justify-end border-t border-slate-100 pt-5">
             <Button type="submit" loading={submitting}>
+              <Save className="h-4 w-4" />
               Save changes
             </Button>
           </div>

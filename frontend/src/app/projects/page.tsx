@@ -16,7 +16,17 @@ import {
   EmptyState,
   Alert,
 } from "@/components/ui";
-import { Search, Upload, Calendar, Building2 } from "lucide-react";
+import {
+  Search,
+  Upload,
+  Calendar,
+  Building2,
+  FolderOpen,
+  ChevronDown,
+  ChevronUp,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import type { Project, Department, Paginated } from "@/lib/types";
 
 function ProjectsInner() {
@@ -30,6 +40,7 @@ function ProjectsInner() {
   const [year, setYear] = useState("");
   const [departmentId, setDepartmentId] = useState("");
   const [topic, setTopic] = useState("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [page, setPage] = useState(1);
   const [result, setResult] = useState<Paginated<Project> | null>(null);
@@ -89,6 +100,8 @@ function ProjectsInner() {
   const thisYear = new Date().getFullYear();
   const years = Array.from({ length: 12 }, (_, i) => thisYear - i);
 
+  const hasActiveFilters = year || departmentId || topic;
+
   return (
     <Container>
       <PageHeader
@@ -106,60 +119,106 @@ function ProjectsInner() {
         }
       />
 
-      {/* Filters */}
-      <Card className="mb-6 p-4">
-        <form onSubmit={onSearch} className="grid grid-cols-1 gap-3 md:grid-cols-12">
-          <div className="md:col-span-5">
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <Input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Search title, abstract or keyword…"
-                className="pl-9"
-              />
+      {/* Search and filters */}
+      <form onSubmit={onSearch} className="mb-6">
+        <div className="flex gap-3">
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search by title, abstract, or keyword..."
+              className="h-11 pl-11 text-base"
+            />
+          </div>
+          <Button type="submit" className="h-11 px-6">
+            Search
+          </Button>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setFiltersOpen(!filtersOpen)}
+          className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700"
+        >
+          {filtersOpen ? (
+            <ChevronUp className="h-4 w-4" />
+          ) : (
+            <ChevronDown className="h-4 w-4" />
+          )}
+          Filters
+          {hasActiveFilters && (
+            <span className="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-[11px] font-semibold text-white">
+              {[year, departmentId, topic].filter(Boolean).length}
+            </span>
+          )}
+        </button>
+
+        {filtersOpen && (
+          <Card className="mt-3 p-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">
+                  Year
+                </label>
+                <Select value={year} onChange={(e) => setYear(e.target.value)}>
+                  <option value="">Any year</option>
+                  {years.map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">
+                  Department
+                </label>
+                <Select
+                  value={departmentId}
+                  onChange={(e) => setDepartmentId(e.target.value)}
+                >
+                  <option value="">All departments</option>
+                  {departments.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.name}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">
+                  Topic
+                </label>
+                <Select
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                >
+                  <option value="">Any topic</option>
+                  {topics.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </Select>
+              </div>
             </div>
-          </div>
-          <div className="md:col-span-2">
-            <Select value={year} onChange={(e) => setYear(e.target.value)}>
-              <option value="">Any year</option>
-              {years.map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </Select>
-          </div>
-          <div className="md:col-span-2">
-            <Select
-              value={departmentId}
-              onChange={(e) => setDepartmentId(e.target.value)}
-            >
-              <option value="">All depts</option>
-              {departments.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                </option>
-              ))}
-            </Select>
-          </div>
-          <div className="md:col-span-2">
-            <Select value={topic} onChange={(e) => setTopic(e.target.value)}>
-              <option value="">Any topic</option>
-              {topics.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </Select>
-          </div>
-          <div className="md:col-span-1">
-            <Button type="submit" className="w-full">
-              Go
-            </Button>
-          </div>
-        </form>
-      </Card>
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={() => {
+                  setYear("");
+                  setDepartmentId("");
+                  setTopic("");
+                }}
+                className="mt-3 text-sm font-medium text-indigo-600 hover:text-indigo-800"
+              >
+                Clear filters
+              </button>
+            )}
+          </Card>
+        )}
+      </form>
 
       {error && (
         <Alert tone="error" className="mb-4">
@@ -168,26 +227,38 @@ function ProjectsInner() {
       )}
 
       {loading ? (
-        <PageSpinner label="Loading projects…" />
+        <PageSpinner label="Loading projects..." />
       ) : projects.length === 0 ? (
         <EmptyState
+          icon={<FolderOpen className="h-10 w-10 text-slate-300" />}
           title="No projects found"
           description="Try adjusting your search or filters."
         />
       ) : (
         <>
-          <p className="mb-3 text-sm text-slate-500">
-            {meta?.total ?? projects.length} project
-            {(meta?.total ?? projects.length) === 1 ? "" : "s"} found
+          <p className="mb-4 text-sm text-slate-500">
+            Showing{" "}
+            <span className="font-medium text-slate-700">
+              {meta?.total ?? projects.length}
+            </span>{" "}
+            project{(meta?.total ?? projects.length) === 1 ? "" : "s"}
           </p>
+
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {projects.map((p) => (
               <Link key={p.id} href={`/projects/${p.id}`} className="group">
-                <Card className="flex h-full flex-col p-5 transition-shadow group-hover:shadow-md">
+                <Card
+                  hover
+                  className={`flex h-full flex-col p-5 ${
+                    p.status === "approved"
+                      ? "border-l-2 border-l-blue-500"
+                      : ""
+                  }`}
+                >
                   <h3 className="line-clamp-2 text-base font-semibold text-slate-900 group-hover:text-indigo-700">
                     {p.title}
                   </h3>
-                  <p className="mt-2 line-clamp-3 flex-1 text-sm text-slate-500">
+                  <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-slate-500">
                     {p.abstract}
                   </p>
                   <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-500">
@@ -219,18 +290,53 @@ function ProjectsInner() {
 
           {/* Pagination */}
           {meta && meta.last_page > 1 && (
-            <div className="mt-8 flex items-center justify-center gap-3">
+            <div className="mt-8 flex items-center justify-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 disabled={page <= 1}
                 onClick={() => load(page - 1)}
               >
+                <ChevronLeft className="h-4 w-4" />
                 Previous
               </Button>
-              <span className="text-sm text-slate-500">
-                Page {meta.current_page} of {meta.last_page}
-              </span>
+              <div className="flex items-center gap-1 px-2">
+                {Array.from({ length: meta.last_page }, (_, i) => i + 1)
+                  .filter((p) => {
+                    if (meta.last_page <= 7) return true;
+                    if (p === 1 || p === meta.last_page) return true;
+                    return Math.abs(p - page) <= 1;
+                  })
+                  .reduce<(number | "ellipsis")[]>((acc, p, i, arr) => {
+                    if (i > 0 && p - (arr[i - 1] as number) > 1) {
+                      acc.push("ellipsis");
+                    }
+                    acc.push(p);
+                    return acc;
+                  }, [])
+                  .map((item, i) =>
+                    item === "ellipsis" ? (
+                      <span
+                        key={`ellipsis-${i}`}
+                        className="px-1 text-sm text-slate-400"
+                      >
+                        ...
+                      </span>
+                    ) : (
+                      <button
+                        key={item}
+                        onClick={() => load(item as number)}
+                        className={`flex h-8 w-8 items-center justify-center rounded text-sm font-medium ${
+                          page === item
+                            ? "bg-indigo-600 text-white"
+                            : "text-slate-600 hover:bg-slate-100"
+                        }`}
+                      >
+                        {item}
+                      </button>
+                    )
+                  )}
+              </div>
               <Button
                 variant="outline"
                 size="sm"
@@ -238,6 +344,7 @@ function ProjectsInner() {
                 onClick={() => load(page + 1)}
               >
                 Next
+                <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
           )}

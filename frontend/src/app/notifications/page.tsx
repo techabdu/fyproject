@@ -31,6 +31,27 @@ function targetHref(n: any): string {
   return "/notifications";
 }
 
+function groupByDate(items: any[]): { label: string; items: any[] }[] {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const yesterday = today - 86400000;
+
+  const groups: Record<string, any[]> = {};
+  for (const item of items) {
+    const t = new Date(item.created_at).getTime();
+    let label: string;
+    if (t >= today) label = "Today";
+    else if (t >= yesterday) label = "Yesterday";
+    else label = "Earlier";
+    (groups[label] ??= []).push(item);
+  }
+
+  const order = ["Today", "Yesterday", "Earlier"];
+  return order
+    .filter((l) => groups[l]?.length)
+    .map((label) => ({ label, items: groups[label] }));
+}
+
 function NotificationsInner() {
   const router = useRouter();
   const [items, setItems] = useState<any[]>([]);
@@ -71,6 +92,8 @@ function NotificationsInner() {
     } catch {}
   }
 
+  const grouped = groupByDate(items);
+
   return (
     <Container className="max-w-3xl">
       <PageHeader
@@ -91,30 +114,43 @@ function NotificationsInner() {
       {loading ? (
         <PageSpinner label="Loading…" />
       ) : items.length === 0 ? (
-        <EmptyState title="No notifications" description="You're all caught up." />
+        <EmptyState
+          title="No notifications"
+          description="You're all caught up."
+          icon={<Bell className="h-6 w-6" />}
+        />
       ) : (
-        <Card className="divide-y divide-slate-100">
-          {items.map((n) => {
-            const Icon = ICONS[n.type] ?? Bell;
-            return (
-              <button
-                key={n.id}
-                onClick={() => openItem(n)}
-                className={cx(
-                  "flex w-full items-start gap-3 px-5 py-4 text-left hover:bg-slate-50",
-                  !n.read_at && "bg-indigo-50/40"
-                )}
-              >
-                <Icon className={cx("mt-0.5 h-5 w-5 shrink-0", TONES[n.type] ?? "text-slate-400")} />
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm text-slate-700">{n.message}</span>
-                  <span className="mt-0.5 block text-xs text-slate-400">{timeAgo(n.created_at)}</span>
-                </span>
-                {!n.read_at && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-indigo-500" />}
-              </button>
-            );
-          })}
-        </Card>
+        <div className="space-y-6">
+          {grouped.map((group) => (
+            <div key={group.label}>
+              <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-400">
+                {group.label}
+              </p>
+              <Card className="divide-y divide-slate-100">
+                {group.items.map((n: any) => {
+                  const Icon = ICONS[n.type] ?? Bell;
+                  return (
+                    <button
+                      key={n.id}
+                      onClick={() => openItem(n)}
+                      className={cx(
+                        "flex w-full items-start gap-3 px-5 py-4 text-left transition-colors hover:bg-slate-50",
+                        !n.read_at && "border-l-2 border-l-blue-500 bg-blue-50/30"
+                      )}
+                    >
+                      <Icon className={cx("mt-0.5 h-5 w-5 shrink-0", TONES[n.type] ?? "text-slate-400")} />
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm text-slate-700">{n.message}</span>
+                        <span className="mt-0.5 block text-xs text-slate-400">{timeAgo(n.created_at)}</span>
+                      </span>
+                      {!n.read_at && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-blue-500" />}
+                    </button>
+                  );
+                })}
+              </Card>
+            </div>
+          ))}
+        </div>
       )}
     </Container>
   );

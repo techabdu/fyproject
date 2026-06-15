@@ -13,6 +13,8 @@ import {
   Button,
   PageSpinner,
   Alert,
+  Avatar,
+  ProgressBar,
 } from "@/components/ui";
 import {
   ArrowLeft,
@@ -65,7 +67,7 @@ function SupervisorDetailInner() {
     }
   }
 
-  if (loading) return <PageSpinner label="Loading supervisor…" />;
+  if (loading) return <PageSpinner label="Loading supervisor..." />;
 
   if (error || !supervisor) {
     return (
@@ -83,12 +85,14 @@ function SupervisorDetailInner() {
       <BackLink />
 
       <Card className="p-6 sm:p-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
+        {/* Profile header with large avatar */}
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
+          <Avatar name={supervisor.name} role="supervisor" size="lg" />
+          <div className="flex-1 text-center sm:text-left">
             <h1 className="text-2xl font-bold text-slate-900">
               {supervisor.name}
             </h1>
-            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
+            <div className="mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm text-slate-500 sm:justify-start">
               <span className="inline-flex items-center gap-1.5">
                 <Building2 className="h-4 w-4" />
                 {supervisor.department?.name ?? "—"}
@@ -97,13 +101,9 @@ function SupervisorDetailInner() {
                 <Mail className="h-4 w-4" />
                 {supervisor.email}
               </span>
-              <span className="inline-flex items-center gap-1.5">
-                <UsersIcon className="h-4 w-4" />
-                {supervisor.current_load}/{supervisor.max_capacity} students
-              </span>
             </div>
           </div>
-          <div className="flex flex-col items-start gap-2 sm:items-end">
+          <div className="flex flex-col items-center gap-2 sm:items-end">
             {supervisor.match && (
               <Badge
                 tone={supervisor.match.percentage >= 60 ? "green" : "yellow"}
@@ -121,35 +121,64 @@ function SupervisorDetailInner() {
           </div>
         </div>
 
+        {/* Capacity section */}
+        <div className="mt-6 rounded-lg bg-slate-50 p-4">
+          <div className="mb-2 flex items-center justify-between text-sm">
+            <span className="inline-flex items-center gap-1.5 font-medium text-slate-700">
+              <UsersIcon className="h-4 w-4" />
+              Student Capacity
+            </span>
+            <span className="text-slate-500">
+              {supervisor.current_load} / {supervisor.max_capacity}
+            </span>
+          </div>
+          <ProgressBar
+            value={supervisor.current_load}
+            max={supervisor.max_capacity}
+          />
+        </div>
+
         <hr className="my-6 border-slate-200" />
 
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-          About
-        </h2>
-        <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-700">
-          {supervisor.bio || "This supervisor has not added a bio yet."}
-        </p>
+        {/* About section */}
+        <section>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+            About
+          </h2>
+          <p className="mt-2 whitespace-pre-line text-base leading-relaxed text-slate-700">
+            {supervisor.bio || "This supervisor has not added a bio yet."}
+          </p>
+        </section>
 
+        {/* Interest tags - larger pills */}
         {supervisor.interest_tags?.length > 0 && (
-          <>
-            <h2 className="mt-6 text-sm font-semibold uppercase tracking-wide text-slate-500">
+          <section className="mt-6">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
               Interest areas
             </h2>
-            <div className="mt-2 flex flex-wrap gap-1.5">
+            <div className="mt-3 flex flex-wrap gap-2">
               {supervisor.interest_tags.map((t) => {
                 const matched = supervisor.match?.matching_tags?.includes(t);
                 return (
-                  <Badge key={t} tone={matched ? "indigo" : "gray"}>
+                  <span
+                    key={t}
+                    className={`inline-block rounded-full px-3.5 py-1.5 text-sm font-medium ${
+                      matched
+                        ? "bg-indigo-600 text-white"
+                        : "bg-slate-100 text-slate-700"
+                    }`}
+                  >
                     {t}
-                  </Badge>
+                  </span>
                 );
               })}
             </div>
-          </>
+          </section>
         )}
 
+        {/* Action buttons */}
         {isStudent && (
-          <div className="mt-8 flex flex-wrap gap-3 border-t border-slate-100 pt-6">
+          <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-slate-100 pt-6">
             <Link href={`/requests/new?supervisor_id=${supervisor.id}`}>
               <Button>
                 <Send className="h-4 w-4" />
@@ -180,7 +209,7 @@ function BackLink() {
   return (
     <Link
       href="/supervisors"
-      className="mb-5 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-800"
+      className="mb-5 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
     >
       <ArrowLeft className="h-4 w-4" />
       Back to supervisors

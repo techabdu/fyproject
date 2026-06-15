@@ -17,9 +17,11 @@ import {
   Alert,
   Badge,
   PageSpinner,
+  Avatar,
+  ProgressBar,
 } from "@/components/ui";
 import { parseKeywords } from "@/lib/utils";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send, AlertTriangle } from "lucide-react";
 import type { Supervisor } from "@/lib/types";
 
 function NewRequestInner() {
@@ -81,7 +83,6 @@ function NewRequestInner() {
           for (const [k, v] of Object.entries(err.errors)) flat[k] = v[0];
           setErrors(flat);
         }
-        // Business-rule errors (e.g. one active request) arrive as 422 message.
         setFormError(err.message);
       } else {
         setFormError("Something went wrong. Please try again.");
@@ -136,28 +137,34 @@ function NewRequestInner() {
             <FieldError message={errors.supervisor_id} />
 
             {selected && (
-              <div className="mt-3 rounded-lg bg-slate-50 p-3 text-sm">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-medium text-slate-800">
-                    {selected.name}
-                  </span>
-                  <Badge tone={selected.has_capacity ? "green" : "red"}>
-                    {selected.available_slots}/{selected.max_capacity} slots
-                  </Badge>
-                  {selected.match && (
-                    <Badge tone="indigo">{selected.match.percentage}% match</Badge>
-                  )}
+              <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div className="flex items-center gap-3">
+                  <Avatar name={selected.name} role="supervisor" />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-slate-800">{selected.name}</p>
+                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                      <Badge tone={selected.has_capacity ? "green" : "red"}>
+                        {selected.available_slots}/{selected.max_capacity} slots
+                      </Badge>
+                      {selected.match && (
+                        <Badge tone="indigo">{selected.match.percentage}% match</Badge>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 {selected.interest_tags.length > 0 && (
-                  <p className="mt-2 text-slate-500">
-                    Interests: {selected.interest_tags.join(", ")}
-                  </p>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {selected.interest_tags.map((t) => (
+                      <Badge key={t} tone="gray">{t}</Badge>
+                    ))}
+                  </div>
                 )}
+                <ProgressBar value={selected.current_load} max={selected.max_capacity} className="mt-3" />
                 {!selected.has_capacity && (
-                  <p className="mt-2 text-red-600">
-                    This supervisor is at full capacity and may be unable to
-                    accept new students.
-                  </p>
+                  <div className="mt-3 flex items-center gap-1.5 text-sm text-red-600">
+                    <AlertTriangle className="h-4 w-4" />
+                    This supervisor is at full capacity and may be unable to accept new students.
+                  </div>
                 )}
               </div>
             )}
@@ -197,8 +204,15 @@ function NewRequestInner() {
               placeholder="comma separated, e.g. machine learning, computer vision"
             />
             <p className="mt-1 text-xs text-slate-500">
-              Used to compute your match score with the supervisor’s interests.
+              Used to compute your match score with the supervisor's interests.
             </p>
+            {parseKeywords(keywords).length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {parseKeywords(keywords).map((k) => (
+                  <Badge key={k} tone="blue">{k}</Badge>
+                ))}
+              </div>
+            )}
             <FieldError message={errors["proposal_keywords.0"] || errors.proposal_keywords} />
           </div>
 

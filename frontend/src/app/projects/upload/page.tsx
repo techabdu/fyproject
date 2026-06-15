@@ -17,9 +17,10 @@ import {
   FieldError,
   Alert,
   Badge,
+  cx,
 } from "@/components/ui";
 import { parseKeywords } from "@/lib/utils";
-import { ArrowLeft, CheckCircle2, FileUp } from "lucide-react";
+import { ArrowLeft, CheckCircle2, FileUp, Upload, X } from "lucide-react";
 import type { Department } from "@/lib/types";
 
 function UploadInner() {
@@ -50,7 +51,6 @@ function UploadInner() {
       .catch(() => {});
   }, []);
 
-  // Default the department to the student's own department when known.
   useEffect(() => {
     if (user?.department_id && !form.department_id) {
       setForm((f) => ({ ...f, department_id: String(user.department_id) }));
@@ -75,7 +75,6 @@ function UploadInner() {
       fd.append("abstract", form.abstract);
       fd.append("department_id", form.department_id);
       fd.append("graduation_year", form.graduation_year);
-      // keywords[] — one append per item.
       for (const k of parseKeywords(form.keywords)) {
         fd.append("keywords[]", k);
       }
@@ -104,12 +103,12 @@ function UploadInner() {
 
   const thisYear = new Date().getFullYear();
   const years = Array.from({ length: 12 }, (_, i) => thisYear - i);
+  const parsedKeywords = parseKeywords(form.keywords);
 
-  // Success view.
   if (success) {
     return (
       <Container className="max-w-3xl">
-        <Card className="p-8 text-center">
+        <Card className="p-8 text-center animate-in">
           <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
             <CheckCircle2 className="h-8 w-8" />
           </span>
@@ -134,7 +133,7 @@ function UploadInner() {
                 {success.advisory.map((d: any, i: number) => (
                   <li
                     key={d.id ?? i}
-                    className="rounded-md border border-amber-200 bg-white/60 p-2 text-xs"
+                    className="rounded-md border border-amber-200 bg-white p-2 text-xs"
                   >
                     <span className="font-medium text-slate-800">
                       {d.title ?? `Project #${d.id}`}
@@ -178,7 +177,7 @@ function UploadInner() {
     <Container className="max-w-3xl">
       <Link
         href="/projects"
-        className="mb-5 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-800"
+        className="mb-5 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to repository
@@ -268,9 +267,9 @@ function UploadInner() {
             <p className="mt-1 text-xs text-slate-400">
               Separate with commas.
             </p>
-            {parseKeywords(form.keywords).length > 0 && (
+            {parsedKeywords.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-1.5">
-                {parseKeywords(form.keywords).map((k) => (
+                {parsedKeywords.map((k) => (
                   <Badge key={k} tone="blue">
                     {k}
                   </Badge>
@@ -285,13 +284,27 @@ function UploadInner() {
             <Label htmlFor="pdf">Project PDF</Label>
             <label
               htmlFor="pdf"
-              className="flex cursor-pointer items-center gap-3 rounded-lg border border-dashed border-slate-300 px-4 py-4 text-sm text-slate-500 hover:border-indigo-400 hover:bg-indigo-50/40"
+              className={cx(
+                "flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed px-6 py-8 text-center transition-colors",
+                pdf
+                  ? "border-blue-300 bg-blue-50/50"
+                  : "border-slate-300 hover:border-blue-400 hover:bg-slate-50"
+              )}
             >
-              <FileUp className="h-5 w-5 text-slate-400" />
               {pdf ? (
-                <span className="font-medium text-slate-700">{pdf.name}</span>
+                <>
+                  <FileUp className="h-8 w-8 text-blue-500" />
+                  <span className="text-sm font-medium text-slate-700">{pdf.name}</span>
+                  <span className="text-xs text-slate-400">
+                    {(pdf.size / 1024 / 1024).toFixed(1)} MB
+                  </span>
+                </>
               ) : (
-                <span>Click to choose a PDF file</span>
+                <>
+                  <Upload className="h-8 w-8 text-slate-400" />
+                  <span className="text-sm text-slate-600">Click to choose a PDF file</span>
+                  <span className="text-xs text-slate-400">Maximum 20 MB</span>
+                </>
               )}
             </label>
             <input
@@ -301,16 +314,27 @@ function UploadInner() {
               className="hidden"
               onChange={(e) => setPdf(e.target.files?.[0] ?? null)}
             />
+            {pdf && (
+              <button
+                type="button"
+                onClick={() => setPdf(null)}
+                className="mt-2 inline-flex items-center gap-1 text-xs text-slate-500 hover:text-red-600"
+              >
+                <X className="h-3 w-3" />
+                Remove file
+              </button>
+            )}
             <FieldError message={errors.pdf?.[0]} />
           </div>
 
-          <div className="flex justify-end gap-3 pt-2">
+          <div className="flex justify-end gap-3 border-t border-slate-100 pt-5">
             <Link href="/projects">
               <Button type="button" variant="outline">
                 Cancel
               </Button>
             </Link>
             <Button type="submit" loading={submitting}>
+              <Upload className="h-4 w-4" />
               Submit project
             </Button>
           </div>

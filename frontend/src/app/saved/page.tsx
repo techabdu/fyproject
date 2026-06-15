@@ -12,8 +12,10 @@ import {
   PageSpinner,
   EmptyState,
   Alert,
+  Avatar,
+  ProgressBar,
 } from "@/components/ui";
-import { Building2, Users as UsersIcon, Send, BookmarkX } from "lucide-react";
+import { Building2, Users as UsersIcon, Send, BookmarkX, Bookmark } from "lucide-react";
 import type { Supervisor } from "@/lib/types";
 
 function SavedInner() {
@@ -70,6 +72,7 @@ function SavedInner() {
         <EmptyState
           title="No bookmarks yet"
           description="Save supervisors from the Find Supervisors page to see them here."
+          icon={<Bookmark className="h-6 w-6" />}
           action={
             <Link href="/supervisors">
               <Button>Find Supervisors</Button>
@@ -79,12 +82,13 @@ function SavedInner() {
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {supervisors.map((s) => (
-            <Card key={s.id} className="flex flex-col p-5">
-              <div className="flex items-start justify-between">
-                <div>
+            <Card key={s.id} hover className="flex flex-col p-5">
+              <div className="flex items-start gap-3">
+                <Avatar name={s.name} role="supervisor" />
+                <div className="min-w-0 flex-1">
                   <Link
                     href={`/supervisors/${s.id}`}
-                    className="text-base font-semibold text-slate-900 hover:text-indigo-700"
+                    className="text-base font-semibold text-slate-900 hover:text-blue-700"
                   >
                     {s.name}
                   </Link>
@@ -102,6 +106,10 @@ function SavedInner() {
                 <Badge tone={s.has_capacity ? "green" : "red"}>
                   {s.has_capacity ? "Available" : "Full"}
                 </Badge>
+              </div>
+
+              <div className="mt-3">
+                <ProgressBar value={s.current_load} max={s.max_capacity} />
               </div>
 
               {s.interest_tags?.length > 0 && (

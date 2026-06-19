@@ -107,7 +107,7 @@ export default function Home() {
               <Link href="/register">
                 <Button
                   size="lg"
-                  className="bg-white text-[#1e3a5f] hover:bg-slate-100 focus-visible:ring-white"
+                  className="bg-[var(--color-accent)] text-white hover:bg-blue-700 focus-visible:ring-white"
                 >
                   Get Started
                   <ArrowRight className="h-4 w-4" />
@@ -265,7 +265,7 @@ export default function Home() {
             <Link href="/register">
               <Button
                 size="lg"
-                className="bg-white text-[#1e3a5f] hover:bg-slate-100 focus-visible:ring-white"
+                className="bg-[var(--color-accent)] text-white hover:bg-blue-700 focus-visible:ring-white"
               >
                 Register Now
               </Button>
@@ -284,10 +284,14 @@ export default function Home() {
 
       {/* ─── Footer ─── */}
       <footer className="bg-slate-900 py-8">
-        <div className="mx-auto max-w-7xl px-6 text-center">
+        <div className="mx-auto flex max-w-7xl flex-col items-center gap-1.5 px-6 text-center">
           <p className="text-sm text-slate-400">
             &copy; {new Date().getFullYear()} FYP Platform &mdash; Ahmadu Bello
             University, Zaria
+          </p>
+          <p className="text-xs text-slate-500">
+            Designed &amp; built by{" "}
+            <span className="font-semibold tracking-wide text-slate-300">HAQ</span>
           </p>
         </div>
       </footer>
